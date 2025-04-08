@@ -5,7 +5,7 @@ using System.Net;
 using System.Reflection;
 using System.Security.Principal;
 
-class DanielInstaller
+class Package-Installer
 {
     static string scriptPath = @"C:\Program Files\Daniel-Package-Installer\installer.ps1";
     static string scriptUpdateUrl = "https://daniel-package-installer.pages.dev/installer.ps1"; // <-- Replace with your real URL
@@ -16,8 +16,8 @@ class DanielInstaller
 
         if (args.Length == 0)
         {
-            Console.WriteLine("Usage: DanielInstaller.exe <SoftwareName>");
-            Console.WriteLine("       DanielInstaller.exe -updatescript");
+            Console.WriteLine("Usage: Package-Installer.exe <SoftwareName>");
+            Console.WriteLine("       Package-Installer.exe -updatescript");
             return;
         }
 
