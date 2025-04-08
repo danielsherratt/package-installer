@@ -4,8 +4,9 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Security.Principal;
+using System.Linq;
 
-class Package-Installer
+class PackageInstaller
 {
     static string scriptPath = @"C:\Program Files\Daniel-Package-Installer\installer.ps1";
     static string scriptUpdateUrl = "https://daniel-package-installer.pages.dev/installer.ps1"; // <-- Replace with your real URL
@@ -16,8 +17,8 @@ class Package-Installer
 
         if (args.Length == 0)
         {
-            Console.WriteLine("Usage: Package-Installer.exe <SoftwareName>");
-            Console.WriteLine("       Package-Installer.exe -updatescript");
+            Console.WriteLine("Usage: PackageInstaller.exe <SoftwareName>");
+            Console.WriteLine("       PackageInstaller.exe -updatescript");
             return;
         }
 
@@ -34,11 +35,11 @@ class Package-Installer
     {
         if (!File.Exists(scriptPath))
         {
-            Console.Error.WriteLine($"ERROR: Script not found at {scriptPath}");
+            Console.Error.WriteLine("ERROR: Script not found at " + scriptPath);
             return;
         }
 
-        string psArgs = $"-ExecutionPolicy Bypass -File \"{scriptPath}\" -SoftwareName \"{softwareName}\"";
+        string psArgs = "-ExecutionPolicy Bypass -File \"" + scriptPath + "\" -SoftwareName \"" + softwareName + "\"";
         ProcessStartInfo psi = new ProcessStartInfo
         {
             FileName = "powershell.exe",
@@ -63,12 +64,12 @@ class Package-Installer
     {
         try
         {
-            Console.WriteLine($"Downloading new script from: {scriptUpdateUrl}");
+            Console.WriteLine("Downloading new script from: " + scriptUpdateUrl);
             using (var client = new WebClient())
             {
                 client.DownloadFile(scriptUpdateUrl, scriptPath);
             }
-            Console.WriteLine($"Script updated successfully at: {scriptPath}");
+            Console.WriteLine("Script updated successfully at: " + scriptPath);
         }
         catch (Exception ex)
         {
@@ -87,7 +88,7 @@ class Package-Installer
             ProcessStartInfo psi = new ProcessStartInfo
             {
                 FileName = Assembly.GetExecutingAssembly().Location,
-                Arguments = string.Join(" ", Environment.GetCommandLineArgs()[1..]),
+                Arguments = string.Join(" ", Environment.GetCommandLineArgs().Skip(1)),
                 Verb = "runas"  // Triggers UAC
             };
 
