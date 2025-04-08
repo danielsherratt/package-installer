@@ -4,6 +4,7 @@ using System.Net;
 using System.IO;
 using System.Reflection;
 using System.Security.Principal;
+using System.Linq;  // Add this for LINQ extension methods like Skip
 
 class DanielInstaller
 {
@@ -35,7 +36,7 @@ class DanielInstaller
         // Check if the script exists, if not, download it
         if (!File.Exists(scriptPath))
         {
-            Console.WriteLine($"Script not found at {scriptPath}. Attempting to download...");
+            Console.WriteLine("Script not found at " + scriptPath + ". Attempting to download...");
             DownloadScript();
         }
 
