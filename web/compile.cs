@@ -1,15 +1,14 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
+using System.IO;
 using System.Reflection;
 using System.Security.Principal;
-using System.Linq;
 
-class PackageInstaller
+class DanielInstaller
 {
     static string scriptPath = @"C:\Program Files\Daniel-Package-Installer\installer.ps1";
-    static string scriptUpdateUrl = "https://daniel-package-installer.pages.dev/installer.ps1"; // <-- Replace with your real URL
+    static string scriptUpdateUrl = "https://daniel-package-installer.pages.dev/installer.ps1"; // Replace with your real URL
 
     static void Main(string[] args)
     {
@@ -17,8 +16,8 @@ class PackageInstaller
 
         if (args.Length == 0)
         {
-            Console.WriteLine("Usage: PackageInstaller.exe <SoftwareName>");
-            Console.WriteLine("       PackageInstaller.exe -updatescript");
+            Console.WriteLine("Usage: DanielInstaller.exe <SoftwareName>");
+            Console.WriteLine("       DanielInstaller.exe -updatescript");
             return;
         }
 
@@ -33,30 +32,38 @@ class PackageInstaller
 
     static void RunInstaller(string softwareName)
     {
+        // Check if the script exists, if not, download it
         if (!File.Exists(scriptPath))
         {
-            Console.Error.WriteLine("ERROR: Script not found at " + scriptPath);
-            return;
+            Console.WriteLine($"Script not found at {scriptPath}. Attempting to download...");
+            DownloadScript();
         }
 
-        string psArgs = "-ExecutionPolicy Bypass -File \"" + scriptPath + "\" -SoftwareName \"" + softwareName + "\"";
-        ProcessStartInfo psi = new ProcessStartInfo
+        if (File.Exists(scriptPath))
         {
-            FileName = "powershell.exe",
-            Arguments = psArgs,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
+            string psArgs = "-ExecutionPolicy Bypass -File \"" + scriptPath + "\" -SoftwareName \"" + softwareName + "\"";
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = psArgs,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
 
-        using (Process process = Process.Start(psi))
+            using (Process process = Process.Start(psi))
+            {
+                process.OutputDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
+                process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+                process.WaitForExit();
+            }
+        }
+        else
         {
-            process.OutputDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
-            process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
-
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            process.WaitForExit();
+            Console.Error.WriteLine("Failed to download the script. Cannot continue.");
         }
     }
 
@@ -65,15 +72,42 @@ class PackageInstaller
         try
         {
             Console.WriteLine("Downloading new script from: " + scriptUpdateUrl);
+
+            // Set TLS version to 1.2 to avoid SSL/TLS issues
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             using (var client = new WebClient())
             {
                 client.DownloadFile(scriptUpdateUrl, scriptPath);
             }
+
             Console.WriteLine("Script updated successfully at: " + scriptPath);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine("Failed to update script: " + ex.Message);
+        }
+    }
+
+    static void DownloadScript()
+    {
+        try
+        {
+            Console.WriteLine("Downloading script from: " + scriptUpdateUrl);
+
+            // Set TLS version to 1.2 to avoid SSL/TLS issues
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(scriptUpdateUrl, scriptPath);
+            }
+
+            Console.WriteLine("Script downloaded successfully to: " + scriptPath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("Failed to download script: " + ex.Message);
         }
     }
 
