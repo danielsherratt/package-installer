@@ -4,7 +4,7 @@
 )
 
 # ----- SETTINGS -----
-$registryUrl = "https://daniel-packageinstaller.pages.dev/software_registry.json"  # <-- Replace with registry URL, please use neit global when possible
+$registryUrl = "https://daniel-package-installer.pages.dev/software_registry.json"  # <-- Replace with registry URL, please use neit global when possible
 $scriptDir = $PSScriptRoot
 $registryPath = "$scriptDir\software_registry.json"
 $logDir = "$scriptDir\logs"
